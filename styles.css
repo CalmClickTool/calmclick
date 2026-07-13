@@ -710,6 +710,8 @@ body.text-large {
   transform: translateY(-2px);
 }
 
+/* Higher specificity than `.get-card > p` so label text stays readable */
+.get-card > p.get-badge,
 .get-badge {
   display: inline-block;
   align-self: flex-start;
@@ -717,13 +719,14 @@ body.text-large {
   padding: 0.28rem 0.65rem;
   border-radius: 999px;
   background: var(--brand);
-  color: #fff;
+  color: #ffffff;
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
+.get-card > p.get-badge.get-badge-soft,
 .get-badge-soft {
   background: var(--bg-soft);
   color: var(--brand-dark);
