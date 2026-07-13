@@ -1,89 +1,95 @@
 # Chrome Web Store — CalmClick listing pack
 
-Use this when uploading at [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
+Upload zip: **`downloads/calmclick-extension.zip`**  
+Privacy policy: **https://calmclicktool.github.io/calmclick/privacy.html**  
+Homepage: **https://calmclicktool.github.io/calmclick/**
 
 ## One-time setup
 
-1. Pay the Google developer registration fee (one-time, currently $5 USD).
-2. Create a new item → **Upload** the zip: `downloads/calmclick-extension.zip`
-   - The zip root must contain `manifest.json` (our pack script does this).
-3. Fill the store listing using the copy below.
-4. Set **Privacy practices** + single-purpose description.
-5. Privacy policy URL: `https://calmclicktool.github.io/calmclick/privacy.html`
-6. Submit for review (often 1–3 days, sometimes longer).
+1. Register as a Chrome Web Store developer (one-time fee).
+2. **New item** → Upload `downloads/calmclick-extension.zip`  
+   (zip root must contain `manifest.json` — `scripts/pack.ps1` does this).
+3. Fill listing copy below.
+4. Complete **Privacy practices** questionnaire honestly (see below).
+5. Submit for review.
 
 ## Listing copy
 
 ### Name
-CalmClick — Check before you click
+CalmClick - Check before you click
 
-### Summary (short, ≤132 characters)
-Check links & messages in plain English before you click. Free, private, no account. Built for everyone.
+### Summary (≤132 characters)
+Check links & messages in plain English before you click. Free, private, no account. On-device checks.
 
 ### Description
 
 ```
 Not sure if a link or message is safe? Pause and check with CalmClick.
 
-CalmClick explains suspicious links, scam-like emails/texts, and common computer errors in plain English — free forever, with no account.
+CalmClick looks for common scam and phishing patterns in links and message text, then explains the result in plain English. Free, no account.
 
 WHAT YOU CAN DO
 • Right-click any link → “Check with CalmClick”
 • Right-click selected text → check a message for common scam patterns
-• Open the popup to paste a link or message anytime
+• Open the toolbar popup to paste a link or message anytime
 
-PRIVACY FIRST
-• Checks run on your device
-• We don’t upload what you paste or right-click
-• No ads, no tracking, no account
-• Only permission: context menu (right-click)
+HOW IT WORKS (HONEST LIMITS)
+• Checks run on your device using a packaged pattern list
+• This is a helper, not a live virus scan or guarantee of safety
+• New scams can appear before our list is updated (updates ship with new extension versions)
+• When money or passwords are involved, verify with the company using a number you already trust
 
-WHO IT’S FOR
-Parents, grandparents, students, and anyone who wants a calm second opinion before clicking.
-
-CalmClick is a helper, not a guarantee. When money or passwords are involved, verify with the company using a phone number you already trust.
+PRIVACY
+• We do not upload the link or text you choose to check
+• No ads, no account, no analytics SDKs
+• Permissions: context menu + temporary session storage for the check handoff
 
 Full privacy policy: https://calmclicktool.github.io/calmclick/privacy.html
-Local offline website: download from https://calmclicktool.github.io/calmclick/#get
+Website & offline download: https://calmclicktool.github.io/calmclick/#get
+Source: https://github.com/CalmClickTool/calmclick
 ```
 
 ### Category
-Productivity (or Social & Communication — Productivity is fine)
+Productivity
 
 ### Language
 English
 
 ### Single purpose
-Help users evaluate links and messages for common scam patterns and explain results in plain English.
+Help users evaluate links and selected text for common scam/phishing patterns and show plain-English guidance.
 
-### Permission justification
+### Permission justifications (dashboard)
 
-| Permission | Why |
-|------------|-----|
-| `contextMenus` | Adds right-click actions to check a link or selected text with CalmClick. |
+| Permission | Justification |
+|------------|----------------|
+| `contextMenus` | Adds right-click “Check with CalmClick” on links and selected text. |
+| `storage` | Temporarily stores the chosen link/text so the checker page can open without putting private text in the URL bar. |
 
-No host permissions. No remote code. No analytics.
+**Host permissions:** none.  
+**Remote code:** none. Pattern data is packaged with the extension.  
+**Analytics / ads:** none.
 
-### Data usage (privacy practices questionnaire)
+### Privacy practices questionnaire (suggested answers)
 
-- Does not collect user data (for store purposes: you do not transmit user content to your servers).
-- Not sold, not used for ads.
-- If asked about “website content”: only the URL/text the user explicitly chooses to check, processed locally in the extension pages.
+- **Does the extension collect user data?** No (user content is processed on-device and not sent to your servers).
+- **Sold to third parties?** No.
+- **Used for purposes unrelated to the single purpose?** No.
+- **Website content / URL?** Only when the user explicitly right-clicks or pastes something to check; processed locally; not transmitted to developer servers.
+
+If Google asks about “storage”: disclose session handoff of the user-selected check payload on-device only.
 
 ## Screenshots (required)
 
-Create 1–5 screenshots, preferably **1280×800** or **640×400**:
+1–5 images, **1280×800** or **640×400**:
 
 1. Right-click menu: “Check with CalmClick”
-2. Results screen with a risky lookalike domain
-3. Message check with scam warnings
+2. Checker result for a lookalike domain (e.g. paypa1-style)
+3. Message result with scam-pattern warnings
 4. Popup paste UI
 
-Promo images (optional but nice): small tile 440×280, marquee 1400×560.
+Optional: small promo 440×280.
 
 ## After approval
 
-1. Copy the store URL.
-2. Put it in `config.js` as `chromeStoreUrl`.
-3. Rebuild zips (`.\scripts\pack.ps1`) and redeploy the site.
-4. Update this file’s YOUR-DOMAIN placeholders for the next release notes.
+1. Put the store URL in site `config.js` → `chromeStoreUrl`
+2. Run `powershell -File scripts/pack.ps1` and push so the website button updates

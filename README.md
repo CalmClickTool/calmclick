@@ -64,7 +64,7 @@ CalmClick ships with a built-in 2026 threat pack and can **download newer public
 
 - Website: auto-checks about once/day + **Update protection lists** button  
 - Offline zip: works without network; update when you next open the online site  
-- Extension: optional fetch of the same feed (`host_permissions` only for our Pages host)
+- **Chrome extension:** uses the **packaged** rules only (no host permission / no remote rules fetch). New patterns ship with extension version updates — cleaner for Web Store policy.
 
 Edit rules: `updates/rules-latest.json` → `scripts/sync-rules.ps1` → commit.
 

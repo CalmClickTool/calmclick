@@ -1,4 +1,4 @@
-/* CalmClick extension checker — uses shared rules engine when available */
+/* CalmClick extension checker — packaged rules only; no remote fetch */
 (function () {
   "use strict";
 
@@ -31,7 +31,8 @@
   }
 
   function levenshtein(a, b) {
-    const m = a.length, n = b.length;
+    const m = a.length,
+      n = b.length;
     const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
     for (let i = 0; i <= m; i++) dp[i][0] = i;
     for (let j = 0; j <= n; j++) dp[0][j] = j;
@@ -45,12 +46,20 @@
   }
 
   function normalizeUrlInput(raw) {
-    let s = String(raw || "").trim().replace(/^<|>$/g, "");
+    let s = String(raw || "")
+      .trim()
+      .replace(/^<|>$/g, "");
     if (!s) return null;
-    const found = s.match(/https?:\/\/[^\s<>"']+/i) || s.match(/\b[a-z0-9][-a-z0-9.]*\.[a-z]{2,}(?:\/[^\s<>"']*)?/i);
+    const found =
+      s.match(/https?:\/\/[^\s<>"']+/i) ||
+      s.match(/\b[a-z0-9][-a-z0-9.]*\.[a-z]{2,}(?:\/[^\s<>"']*)?/i);
     if (found) s = found[0];
     if (!/^https?:\/\//i.test(s)) s = "https://" + s;
-    try { return new URL(s); } catch { return null; }
+    try {
+      return new URL(s);
+    } catch {
+      return null;
+    }
   }
 
   function domainParts(hostname) {
@@ -101,19 +110,49 @@
       score += 2;
       findings.push("Shortened link — the real destination is hidden.");
     }
-    const clean = sld.replace(/[^a-z0-9]/gi, "").toLowerCase();
-    for (let i = 0; i < brands.length; i++) {
-      const brand = brands[i];
-      if (clean === brand) continue;
-      if (clean.indexOf(brand) !== -1 && clean !== brand) {
-        score += 3;
-        findings.push("Contains “" + brand + "” but is not the official domain (" + registrable + ").");
-      } else {
-        const dist = levenshtein(clean, brand);
+    function normalizeDigits(s) {
+      return String(s)
+        .toLowerCase()
+        .replace(/0/g, "o")
+        .replace(/1/g, "l")
+        .replace(/3/g, "e")
+        .replace(/4/g, "a")
+        .replace(/5/g, "s")
+        .replace(/7/g, "t");
+    }
+    const pieces = sld.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+    const candidates = [sld.replace(/[^a-z0-9]/gi, "").toLowerCase()].concat(pieces);
+    const seenBrand = {};
+    for (let c = 0; c < candidates.length; c++) {
+      const clean = candidates[c];
+      if (!clean) continue;
+      const deDigit = normalizeDigits(clean);
+      for (let i = 0; i < brands.length; i++) {
+        const brand = brands[i];
+        if (seenBrand[brand] || clean === brand) continue;
+        if (clean.indexOf(brand) !== -1 && clean !== brand) {
+          score += 3;
+          findings.push(
+            "Contains “" + brand + "” but is not the official domain (" + registrable + ")."
+          );
+          seenBrand[brand] = 1;
+          continue;
+        }
+        if (
+          (deDigit === brand || (brand.length >= 5 && deDigit.indexOf(brand) !== -1)) &&
+          clean !== brand
+        ) {
+          score += 3;
+          findings.push("Looks like “" + brand + "” with number tricks.");
+          seenBrand[brand] = 1;
+          continue;
+        }
+        const dist = Math.min(levenshtein(clean, brand), levenshtein(deDigit, brand));
         const threshold = brand.length <= 7 ? 1 : 2;
         if (dist > 0 && dist <= threshold) {
           score += 3;
           findings.push("Looks similar to “" + brand + "” (possible fake).");
+          seenBrand[brand] = 1;
         }
       }
     }
@@ -126,15 +165,16 @@
     if (score >= 5) {
       level = "danger";
       title = "Be careful — this link looks risky";
-      body = "Do not enter passwords or card numbers here.";
+      body = "Do not enter passwords or card numbers here. This is a pattern check, not a live virus scan.";
     } else if (score >= 2) {
       level = "caution";
       title = "Pause — a few things look off";
       body = "Double‑check before signing in or paying.";
     } else {
-      level = "safe";
+      level = "info";
       title = "No major red flags in the address";
-      body = "Structure looks ordinary. Still only log in if you expected this site.";
+      body =
+        "The address structure looks ordinary. That does not prove the whole website is safe — only that we didn’t see classic URL tricks.";
     }
 
     return {
@@ -160,20 +200,39 @@
   function analyzeMessage(text) {
     const raw = String(text || "").trim();
     if (!raw) {
-      return { level: "caution", title: "Nothing to check", body: "Paste a message first.", findings: [], next: [] };
+      return {
+        level: "caution",
+        title: "Nothing to check",
+        body: "Paste a message first.",
+        findings: [],
+        next: []
+      };
     }
     const r = rules();
     const signals = (r && r.signals) || [];
     const hits = [];
     let score = 0;
+    let criticalHit = false;
+    const criticalIds = {
+      clickfix: 1,
+      fake_captcha: 1,
+      credentials: 1,
+      wallet_drainer: 1,
+      ai_voice_deepfake: 1
+    };
     for (let i = 0; i < signals.length; i++) {
       const sig = signals[i];
       const regs = sig._regexes || [];
       for (let j = 0; j < regs.length; j++) {
-        if (regs[j].test(raw)) {
-          hits.push(sig.label);
-          score += sig.weight || 1;
-          break;
+        try {
+          if (regs[j].test(raw)) {
+            hits.push(sig.label);
+            score += sig.weight || 1;
+            if (criticalIds[sig.id]) criticalHit = true;
+            break;
+          }
+        } catch (_e) {
+          /* ignore bad regex */
         }
       }
     }
@@ -190,18 +249,20 @@
     }
 
     let level, title, body;
-    if (score >= 6) {
+    if (score >= 6 || criticalHit) {
       level = "danger";
       title = "This looks like a scam or high‑pressure trap";
-      body = "Treat it as dangerous until verified another way.";
+      body =
+        "Serious scam patterns showed up. Treat it as dangerous until verified another way. Pattern matching can miss new scams.";
     } else if (score >= 2) {
       level = "caution";
       title = "Be cautious — scam‑like signs present";
       body = "Verify before you click, reply, or pay.";
     } else {
-      level = "safe";
+      level = "info";
       title = "No strong scam patterns found";
-      body = "Still use judgment — new scams appear often.";
+      body =
+        "We didn’t match common scam wording. New scams appear often — still use judgment.";
     }
 
     const unique = [];
@@ -231,9 +292,7 @@
         ? "result-danger"
         : result.level === "caution"
           ? "result-caution"
-          : result.level === "info"
-            ? "result-info"
-            : "result-safe";
+          : "result-info";
     el.hidden = false;
     el.className = "result " + cls;
     el.innerHTML =
@@ -269,37 +328,44 @@
         : "");
   }
 
-  function showRulesLine(extra) {
+  function showRulesLine() {
     const line = document.getElementById("rulesLine");
     if (!line || !window.CalmClickRules) return;
     const s = window.CalmClickRules.getStatus();
     line.textContent =
-      "Protection list " +
+      "Packaged protection list " +
       s.rulesVersion +
       " · " +
       s.signalCount +
-      " pattern groups" +
-      (extra ? " · " + extra : "");
+      " pattern groups · updates ship with extension versions";
+  }
+
+  async function loadPayload() {
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    if (id && chrome.storage && chrome.storage.session) {
+      const key = "check_" + id;
+      const bag = await chrome.storage.session.get(key);
+      const payload = bag[key];
+      await chrome.storage.session.remove(key);
+      if (payload && payload.type && payload.value) return payload;
+    }
+    // Legacy fallback (older builds may still use query params)
+    if (params.get("link")) return { type: "link", value: params.get("link") };
+    if (params.get("message")) return { type: "message", value: params.get("message") };
+    return null;
   }
 
   async function boot() {
-    if (window.CalmClickRules) {
-      showRulesLine("checking for updates…");
-      const u = await window.CalmClickRules.checkForUpdates({ force: false });
-      if (u.ok && u.isNewer) showRulesLine("updated just now");
-      else if (u.ok) showRulesLine("up to date");
-      else showRulesLine("built-in list (offline update skipped)");
-    }
-
-    const params = new URLSearchParams(location.search);
-    const link = params.get("link");
-    const message = params.get("message");
-    if (link) render(analyzeLink(link));
-    else if (message) render(analyzeMessage(message));
-    else {
+    showRulesLine();
+    const payload = await loadPayload();
+    if (!payload) {
       document.getElementById("status").textContent =
-        "Paste a link from the extension popup to check it.";
+        "Use the popup or right‑click a link/selection to check something.";
+      return;
     }
+    if (payload.type === "link") render(analyzeLink(payload.value));
+    else render(analyzeMessage(payload.value));
   }
 
   boot();

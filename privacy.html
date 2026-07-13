@@ -30,7 +30,7 @@
     <div class="wrap privacy-block legal-page">
       <p class="eyebrow">Privacy Policy</p>
       <h1>CalmClick privacy policy</h1>
-      <p class="section-sub">Last updated: July 12, 2026</p>
+      <p class="section-sub">Last updated: July 13, 2026</p>
 
       <h2>In one sentence</h2>
       <p>
@@ -84,18 +84,21 @@
       <h2>Browser extension</h2>
       <p>
         The CalmClick extension can open a check screen for a link you right‑click or text you select.
-        That content is passed only into the extension’s own pages on your computer so the same
-        local rules can run. It is not transmitted to CalmClick for storage or remote processing.
+        That content is passed only into the extension’s own pages on your computer so the packaged
+        rules can run. It is not transmitted to CalmClick for storage or remote processing.
       </p>
       <p>
         Permissions used:
       </p>
       <ul class="privacy-list">
         <li><strong>contextMenus</strong> — adds “Check with CalmClick” to the right‑click menu.</li>
-        <li><strong>https://calmclicktool.github.io/*</strong> — only so the extension can download the public protection-list file (pattern updates). Not used to read your browsing or send pastes.</li>
+        <li><strong>storage</strong> — briefly holds the link or text you chose to check so it can open in the checker tab without putting the full text in the page address. Session storage is used when available.</li>
       </ul>
       <p>
-        The extension does not request access to browse all websites, read your email, or modify page content.
+        The extension package does <strong>not</strong> request host permissions to browse the web,
+        read your email, or modify page content. It does not download remote rule files
+        (new patterns ship with extension updates). The separate website may still download
+        a public pattern list as described above.
       </p>
 
       <h2>Offline / local copy</h2>
@@ -117,8 +120,10 @@
 
       <h2>Contact</h2>
       <p>
-        CalmClick is a free community-minded project. For privacy questions about a deployment you host yourself,
-        contact the person or organization that published that copy of the site.
+        Project home:
+        <a href="https://github.com/CalmClickTool/calmclick">github.com/CalmClickTool/calmclick</a>.
+        Privacy questions and issue reports can be filed there.
+        CalmClick is a free helper, not a professional security product or guarantee of safety.
       </p>
 
       <p style="margin-top: 1.5rem;">

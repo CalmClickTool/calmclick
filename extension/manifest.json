@@ -1,14 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "CalmClick — Check before you click",
+  "name": "CalmClick - Check before you click",
   "short_name": "CalmClick",
-  "version": "1.1.0",
-  "description": "Right-click any link or selected text to check it in plain English. Free, private, no account. Auto-updatable protection lists.",
+  "version": "1.1.1",
+  "description": "Right-click a link or selected text to check it in plain English. Free, private, no account. Checks run on your device.",
   "homepage_url": "https://calmclicktool.github.io/calmclick/",
-  "permissions": ["contextMenus"],
-  "host_permissions": [
-    "https://calmclicktool.github.io/*"
-  ],
+  "permissions": ["contextMenus", "storage"],
   "action": {
     "default_title": "CalmClick",
     "default_popup": "popup.html",

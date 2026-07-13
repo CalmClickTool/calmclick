@@ -136,22 +136,57 @@
     return false;
   }
 
+  function normalizeDigits(s) {
+    return s
+      .toLowerCase()
+      .replace(/0/g, "o")
+      .replace(/1/g, "l")
+      .replace(/3/g, "e")
+      .replace(/4/g, "a")
+      .replace(/5/g, "s")
+      .replace(/7/g, "t");
+  }
+
   function lookalikeHits(sld) {
     const hits = [];
-    const clean = sld.replace(/[^a-z0-9]/gi, "").toLowerCase();
-    for (const brand of trustedBrands()) {
-      if (clean === brand) continue;
-      if (clean.includes(brand) && clean !== brand) {
-        hits.push({ brand, reason: `contains “${brand}” but is not the official domain` });
-        continue;
-      }
-      const dist = levenshtein(clean, brand);
-      const threshold = brand.length <= 4 ? 1 : brand.length <= 7 ? 1 : 2;
-      if (dist > 0 && dist <= threshold) {
-        hits.push({ brand, reason: `looks similar to “${brand}” (possible typo‑squat)` });
+    // Check full SLD and each hyphen piece (paypa1-secure-login)
+    const pieces = String(sld)
+      .toLowerCase()
+      .split(/[^a-z0-9]+/i)
+      .filter(Boolean);
+    const candidates = [sld.replace(/[^a-z0-9]/gi, "").toLowerCase(), ...pieces.map((p) => p.replace(/[^a-z0-9]/gi, ""))];
+
+    for (const clean of candidates) {
+      if (!clean) continue;
+      const deDigit = normalizeDigits(clean);
+      for (const brand of trustedBrands()) {
+        if (clean === brand) continue;
+        if (clean.includes(brand) && clean !== brand) {
+          hits.push({ brand, reason: `contains “${brand}” but is not the official domain` });
+          continue;
+        }
+        if (deDigit === brand && clean !== brand) {
+          hits.push({ brand, reason: `looks like “${brand}” with numbers swapped for letters` });
+          continue;
+        }
+        if (deDigit.includes(brand) && clean !== brand && brand.length >= 5) {
+          hits.push({ brand, reason: `contains a “${brand}”-like spelling with number tricks` });
+          continue;
+        }
+        const dist = Math.min(levenshtein(clean, brand), levenshtein(deDigit, brand));
+        const threshold = brand.length <= 4 ? 1 : brand.length <= 7 ? 1 : 2;
+        if (dist > 0 && dist <= threshold) {
+          hits.push({ brand, reason: `looks similar to “${brand}” (possible typo‑squat)` });
+        }
       }
     }
-    return hits;
+    // Dedupe by brand
+    const seen = new Set();
+    return hits.filter((h) => {
+      if (seen.has(h.brand)) return false;
+      seen.add(h.brand);
+      return true;
+    });
   }
 
   /** Free hosts often abused for phishing kits (2024–2026). */
@@ -228,18 +263,6 @@
       }
     }
 
-    // Homoglyph digits in brand-like labels (paypa1, g00gle)
-    if (/\d/.test(sld) && /[a-z]/i.test(sld)) {
-      const digitSpoof = sld.replace(/0/g, "o").replace(/1/g, "l").replace(/3/g, "e").replace(/4/g, "a").replace(/5/g, "s").replace(/7/g, "t");
-      for (const brand of trustedBrands()) {
-        if (digitSpoof === brand && sld !== brand) {
-          score += 3;
-          findings.push(`Name “${sld}” looks like “${brand}” with numbers swapped for letters — a common fake.`);
-          break;
-        }
-      }
-    }
-
     // Double extension style paths / exe-looking
     if (/\.(exe|scr|msi|bat|cmd|ps1|js|vbs|apk)(\?|$)/i.test(url.pathname)) {
       score += 3;
@@ -299,15 +322,17 @@
     if (score >= 5) {
       level = "danger";
       title = "Be careful — this link looks risky";
-      body = "Several warning signs showed up. Do not enter passwords, codes, or card numbers here.";
+      body =
+        "Several warning signs showed up. Do not enter passwords, codes, or card numbers here. This is a pattern check, not a live website safety scan.";
     } else if (score >= 2) {
       level = "caution";
       title = "Pause — a few things look off";
       body = "It might still be legitimate, but double‑check before signing in or paying.";
     } else {
-      level = "safe";
+      level = "info";
       title = "No major red flags in the address";
-      body = "The link structure looks ordinary. That does not guarantee the whole website is honest — but there are no classic scam patterns in the URL itself.";
+      body =
+        "The link structure looks ordinary. That does not prove the whole website is safe — only that we didn’t see classic URL tricks.";
     }
 
     const next =
@@ -415,6 +440,15 @@
     const signals = scamSignals();
     const hits = [];
     let score = 0;
+    let criticalHit = false;
+    // These alone mean “do not follow the instructions”
+    const criticalIds = new Set([
+      "clickfix",
+      "fake_captcha",
+      "credentials",
+      "wallet_drainer",
+      "ai_voice_deepfake"
+    ]);
 
     for (const sig of signals) {
       const regs = sig._regexes || sig.patterns || [];
@@ -422,6 +456,7 @@
         if (re && typeof re.test === "function" && re.test(raw)) {
           hits.push(sig.label);
           score += sig.weight || 1;
+          if (criticalIds.has(sig.id)) criticalHit = true;
           break;
         }
       }
@@ -450,10 +485,11 @@
     }
 
     let level, title, body;
-    if (score >= 6) {
+    if (score >= 6 || criticalHit) {
       level = "danger";
       title = "This looks like a scam or high‑pressure trap";
-      body = "Multiple classic scam patterns showed up. Treat it as dangerous until proven otherwise through a channel you trust.";
+      body =
+        "Serious scam patterns showed up. Treat it as dangerous until proven otherwise through a channel you trust. Pattern matching can miss brand‑new scams.";
     } else if (score >= 3) {
       level = "caution";
       title = "Be cautious — this has scam‑like signs";
@@ -463,9 +499,10 @@
       title = "A couple of things to double‑check";
       body = "Not a clear scam by itself, but worth a second look before clicking or replying.";
     } else {
-      level = "safe";
+      level = "info";
       title = "No strong scam patterns found";
-      body = "We didn’t see the usual scare tactics. Still use judgment — new scams appear all the time.";
+      body =
+        "We didn’t match common scam wording. That is not a safety certificate — new scams appear all the time.";
     }
 
     const uniqueHits = [...new Set(hits)];
