@@ -1,0 +1,5 @@
+# Cloudflare Pages / Netlify-style security headers
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: interest-cohort=()

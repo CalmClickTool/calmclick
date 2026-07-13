@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="CalmClick helps you check links, messages, and computer errors in plain English — free, private, no account needed." />
+  <meta name="theme-color" content="#1a5f4a" />
+  <title>CalmClick — Pause. Check. Feel sure.</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231a5f4a'/%3E%3Cpath d='M18 34l10 10 18-22' stroke='%23f4f7f5' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#top" aria-label="CalmClick home">
+        <span class="brand-mark" aria-hidden="true">✓</span>
+        <span class="brand-text">CalmClick</span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#check">Check something</a>
+        <a href="#get">Get CalmClick</a>
+        <a href="#howto">How do I…?</a>
+        <a href="privacy.html">Privacy</a>
+      </nav>
+      <button type="button" class="text-size-btn" id="textSizeBtn" aria-pressed="false" title="Make text larger">
+        A<span class="text-size-plus">A</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="wrap hero-inner">
+        <p class="eyebrow">Free · Private · No account</p>
+        <h1>Not sure if something is safe?<br />Pause and check first.</h1>
+        <p class="lede">
+          CalmClick explains links, messages, and computer errors in plain English.
+          Nothing you paste leaves your computer.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#check">Check something now</a>
+          <a class="btn btn-ghost" href="#get">Get the app / extension</a>
+        </div>
+        <ul class="trust-row" aria-label="Promises">
+          <li>100% free forever</li>
+          <li>Local copy works offline</li>
+          <li>Built for everyone, not just techies</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel panel-get" id="get" aria-labelledby="get-title">
+      <div class="wrap">
+        <h2 id="get-title">Three ways to use CalmClick</h2>
+        <p class="section-sub">
+          Same tools either way. We gently recommend a <strong>local copy on your computer</strong>
+          when you can — it works offline and never depends on our website being up.
+        </p>
+
+        <div class="get-grid">
+          <!-- Local — nudged as best for privacy -->
+          <article class="get-card get-card-featured">
+            <p class="get-badge">Best for privacy</p>
+            <div class="get-icon" aria-hidden="true">💾</div>
+            <h3>Download for your computer</h3>
+            <p>
+              Save CalmClick as files on your PC. Double‑click <code>index.html</code> anytime —
+              even without the internet. Nothing you paste needs a website to work.
+            </p>
+            <ul class="get-points">
+              <li>Works offline</li>
+              <li>No store account needed</li>
+              <li>Easy to share with family (send the folder/zip)</li>
+            </ul>
+            <a class="btn btn-primary" id="downloadLocalBtn" href="downloads/calmclick-offline.zip" download>
+              Download free local copy
+            </a>
+            <p class="get-foot">Zip file · open folder · double‑click <code>index.html</code></p>
+          </article>
+
+          <!-- Extension -->
+          <article class="get-card">
+            <p class="get-badge get-badge-soft">Handy every day</p>
+            <div class="get-icon" aria-hidden="true">🧩</div>
+            <h3>Chrome / Edge extension</h3>
+            <p>
+              Right‑click any link → <strong>Check with CalmClick</strong>.
+              Great when you’re already in the browser.
+            </p>
+            <ul class="get-points">
+              <li>One‑click checks from any page</li>
+              <li>Still private (runs on your device)</li>
+              <li>Free forever</li>
+            </ul>
+            <a class="btn btn-secondary" id="chromeStoreBtn" href="#extension-install">
+              Get the free extension
+            </a>
+            <p class="get-foot" id="extensionCtaNote">Chrome Web Store · also works in Edge</p>
+          </article>
+
+          <!-- Use online -->
+          <article class="get-card">
+            <p class="get-badge get-badge-soft">No install</p>
+            <div class="get-icon" aria-hidden="true">🌐</div>
+            <h3>Use this free website</h3>
+            <p>
+              You’re already here. Paste a link, message, or error below.
+              Checks still run in <em>your</em> browser — we don’t upload what you paste.
+            </p>
+            <ul class="get-points">
+              <li>Instant — no download</li>
+              <li>Good for a quick one‑off check</li>
+              <li>Share this page with anyone</li>
+            </ul>
+            <a class="btn btn-ghost" href="#check">Check something now</a>
+            <p class="get-foot">Tip: download later if you use it often</p>
+          </article>
+        </div>
+
+        <div class="nudge-banner" role="note">
+          <strong>Why “local” gets the gold star:</strong>
+          a file on your computer can’t be changed by a random website outage, doesn’t need you to
+          trust a host for uptime, and keeps the whole tool in a folder you control.
+          The online site and extension are still private by design — local is just the simplest mental model.
+        </div>
+
+        <details class="install-details" id="extension-install">
+          <summary>How to install the extension (Chrome or Edge)</summary>
+          <div class="install-body">
+            <div id="storeInstallBlock" hidden>
+              <p>
+                <a id="storeInstallLink" class="btn btn-primary" href="#" target="_blank" rel="noopener">
+                  Open in Chrome Web Store
+                </a>
+              </p>
+              <p>Click <strong>Add to Chrome</strong> (or Edge). That’s it.</p>
+            </div>
+            <div id="sideloadInstallBlock">
+              <ol class="install-steps">
+                <li>
+                  <a id="downloadExtBtn" href="downloads/calmclick-extension.zip" download>Download the extension zip</a>
+                  and unzip it to a folder you’ll keep (don’t delete the folder later).
+                </li>
+                <li>Open <code>chrome://extensions</code> (Chrome) or <code>edge://extensions</code> (Edge).</li>
+                <li>Turn on <strong>Developer mode</strong> (top right).</li>
+                <li>Click <strong>Load unpacked</strong> and select the unzipped <code>extension</code> folder.</li>
+                <li>Pin CalmClick from the puzzle-piece menu if you like. Right‑click any link → Check with CalmClick.</li>
+              </ol>
+              <p class="hint">
+                When the Chrome Web Store listing is live, this page will point you there for one‑click install.
+                Sideloading stays available forever for the local / offline crowd.
+              </p>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="panel" id="check" aria-labelledby="check-title">
+      <div class="wrap">
+        <h2 id="check-title">What would you like to check?</h2>
+        <p class="section-sub">Pick one, paste what you’re looking at, and we’ll explain it simply.</p>
+
+        <div class="tool-tabs" role="tablist" aria-label="Check type">
+          <button type="button" class="tool-tab is-active" role="tab" aria-selected="true" data-tool="link" id="tab-link">
+            <span class="tab-icon" aria-hidden="true">🔗</span>
+            A link
+          </button>
+          <button type="button" class="tool-tab" role="tab" aria-selected="false" data-tool="message" id="tab-message">
+            <span class="tab-icon" aria-hidden="true">✉️</span>
+            A message
+          </button>
+          <button type="button" class="tool-tab" role="tab" aria-selected="false" data-tool="error" id="tab-error">
+            <span class="tab-icon" aria-hidden="true">⚠️</span>
+            An error
+          </button>
+        </div>
+
+        <!-- Link checker -->
+        <div class="tool-panel is-active" id="panel-link" role="tabpanel" aria-labelledby="tab-link">
+          <label class="field-label" for="linkInput">Paste the link (or type the website address)</label>
+          <div class="input-row">
+            <input
+              id="linkInput"
+              class="field"
+              type="text"
+              inputmode="url"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Example: https://www.example.com/login"
+            />
+            <button type="button" class="btn btn-primary" id="checkLinkBtn">Check this link</button>
+          </div>
+          <p class="hint">Tip: You can right‑click a link in your email or browser, choose “Copy link,” then paste it here.</p>
+          <div id="linkResult" class="result" hidden></div>
+        </div>
+
+        <!-- Message checker -->
+        <div class="tool-panel" id="panel-message" role="tabpanel" aria-labelledby="tab-message" hidden>
+          <label class="field-label" for="messageInput">Paste the text of the email, text, or chat message</label>
+          <textarea
+            id="messageInput"
+            class="field field-area"
+            rows="7"
+            placeholder="Example: “Your account will be closed in 24 hours. Click here and enter your password now…”"
+          ></textarea>
+          <div class="input-row single">
+            <button type="button" class="btn btn-primary" id="checkMessageBtn">Check this message</button>
+          </div>
+          <p class="hint">We look for common scam patterns (urgency, gift cards, fake banks). We never send your text anywhere.</p>
+          <div id="messageResult" class="result" hidden></div>
+        </div>
+
+        <!-- Error explainer -->
+        <div class="tool-panel" id="panel-error" role="tabpanel" aria-labelledby="tab-error" hidden>
+          <label class="field-label" for="errorInput">Paste or describe the error you see</label>
+          <textarea
+            id="errorInput"
+            class="field field-area"
+            rows="5"
+            placeholder="Example: “This site can’t be reached” or “Windows is not genuine” or “ERR_CONNECTION_TIMED_OUT”"
+          ></textarea>
+          <div class="input-row single">
+            <button type="button" class="btn btn-primary" id="checkErrorBtn">Explain this error</button>
+          </div>
+          <p class="hint">Or tap a common one below — no typing needed.</p>
+          <div class="chip-row" id="errorChips" aria-label="Common errors"></div>
+          <div id="errorResult" class="result" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel panel-soft" id="howto" aria-labelledby="howto-title">
+      <div class="wrap">
+        <h2 id="howto-title">How do I…?</h2>
+        <p class="section-sub">Simple steps for everyday computer tasks. No jargon.</p>
+        <div class="howto-grid" id="howtoGrid"></div>
+        <div id="howtoDetail" class="howto-detail" hidden></div>
+      </div>
+    </section>
+
+    <section class="panel" id="privacy" aria-labelledby="privacy-title">
+      <div class="wrap privacy-block">
+        <h2 id="privacy-title">Your privacy is the point</h2>
+        <ul class="privacy-list">
+          <li><strong>Nothing you paste is uploaded.</strong> Checks run only on your device.</li>
+          <li><strong>No account. No cookies for tracking. No ads.</strong></li>
+          <li><strong>No “cloud AI” reading your messages.</strong> Pattern checks are local rules anyone can inspect.</li>
+          <li><strong>Download a local copy</strong> if you want the tool fully offline under your control.</li>
+        </ul>
+        <p class="privacy-note">
+          CalmClick is a helper, not a guarantee. When money, passwords, or personal ID are involved,
+          slow down and verify with the company using a phone number you already trust — not one in a message.
+          <a href="privacy.html">Read the full privacy policy</a>.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <p><strong>CalmClick</strong> — free tools for people who just want computers to make sense.</p>
+      <p class="footer-meta">
+        <a href="#get">Download / extension</a>
+        · <a href="privacy.html">Privacy</a>
+        · Share with family
+      </p>
+    </div>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="data/errors.js"></script>
+  <script src="data/scam-patterns.js"></script>
+  <script src="data/howtos.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

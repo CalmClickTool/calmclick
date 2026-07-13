@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CalmClick</title>
+  <style>
+    body {
+      margin: 0;
+      font: 15px/1.45 "Segoe UI", system-ui, sans-serif;
+      color: #15231c;
+      width: 300px;
+      background: #f3f6f4;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1rem;
+      background: #1a5f4a;
+      color: #fff;
+      font-weight: 700;
+    }
+    .mark {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 6px;
+      background: #fff;
+      color: #1a5f4a;
+      display: grid;
+      place-items: center;
+      font-size: 0.85rem;
+    }
+    main { padding: 0.9rem 1rem 1rem; }
+    p { margin: 0 0 0.75rem; color: #3d5248; }
+    label { display: block; font-weight: 700; margin-bottom: 0.35rem; font-size: 0.92rem; }
+    input, textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 2px solid #c9d6ce;
+      border-radius: 8px;
+      padding: 0.55rem 0.65rem;
+      font: inherit;
+      margin-bottom: 0.65rem;
+    }
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 999px;
+      padding: 0.65rem;
+      font: inherit;
+      font-weight: 700;
+      background: #1a5f4a;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover { background: #0f3f31; }
+    .hint { font-size: 0.85rem; color: #5f7468; margin-top: 0.65rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="mark">✓</span>
+    <span>CalmClick</span>
+  </header>
+  <main>
+    <p>Paste a link or message. We explain it in plain English — on your device only.</p>
+    <label for="q">Link or message</label>
+    <textarea id="q" rows="4" placeholder="https://… or paste a text/email"></textarea>
+    <button type="button" id="go">Check with CalmClick</button>
+    <p class="hint">Tip: right‑click any link on a page → “Check with CalmClick”.</p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
