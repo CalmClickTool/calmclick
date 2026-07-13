@@ -1,18 +1,6 @@
-/* Self-contained checker for the extension tab */
+/* CalmClick extension checker — uses shared rules engine when available */
 (function () {
   "use strict";
-
-  const TRUSTED_BRANDS = [
-    "google", "gmail", "youtube", "microsoft", "apple", "icloud", "amazon", "paypal",
-    "netflix", "facebook", "instagram", "whatsapp", "chase", "wellsfargo", "bankofamerica",
-    "ebay", "walmart", "irs", "usps", "ups", "fedex", "venmo", "cashapp"
-  ];
-  const SUSPICIOUS_TLDS = new Set([
-    "zip", "mov", "xyz", "top", "gq", "tk", "ml", "cf", "ga", "work", "click", "loan", "win"
-  ]);
-  const SHORTENERS = new Set([
-    "bit.ly", "tinyurl.com", "t.co", "goo.gl", "rebrand.ly", "ow.ly", "is.gd", "cutt.ly"
-  ]);
 
   function escapeHtml(str) {
     return String(str)
@@ -20,6 +8,26 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  function rules() {
+    if (window.CalmClickRules) return window.CalmClickRules.getRules();
+    return window.CALMCLICK_RULES || null;
+  }
+
+  function trustedBrands() {
+    const r = rules();
+    return (r && r.trustedBrands) || [];
+  }
+
+  function suspiciousTlds() {
+    const r = rules();
+    return (r && r.suspiciousTlds) || new Set();
+  }
+
+  function shorteners() {
+    const r = rules();
+    return (r && r.shorteners) || new Set();
   }
 
   function levenshtein(a, b) {
@@ -69,6 +77,9 @@
     const { host, tld, registrable, sld } = domainParts(url.hostname);
     const findings = [];
     let score = 0;
+    const brands = trustedBrands();
+    const tlds = suspiciousTlds();
+    const shorts = shorteners();
 
     if (/^(\d{1,3}\.){3}\d{1,3}$/.test(host)) {
       score += 3;
@@ -82,30 +93,31 @@
       score += 3;
       findings.push("Contains username/password inside the URL — highly risky.");
     }
-    if (SUSPICIOUS_TLDS.has(tld)) {
+    if (tlds.has(tld)) {
       score += 2;
-      findings.push(`Ends with .${tld}, which scammers use more often.`);
+      findings.push("Ends with ." + tld + ", which scammers use more often.");
     }
-    if (SHORTENERS.has(registrable) || SHORTENERS.has(host)) {
+    if (shorts.has(registrable) || shorts.has(host)) {
       score += 2;
       findings.push("Shortened link — the real destination is hidden.");
     }
     const clean = sld.replace(/[^a-z0-9]/gi, "").toLowerCase();
-    for (const brand of TRUSTED_BRANDS) {
+    for (let i = 0; i < brands.length; i++) {
+      const brand = brands[i];
       if (clean === brand) continue;
-      if (clean.includes(brand) && clean !== brand) {
+      if (clean.indexOf(brand) !== -1 && clean !== brand) {
         score += 3;
-        findings.push(`Contains “${brand}” but is not the official domain (${registrable}).`);
+        findings.push("Contains “" + brand + "” but is not the official domain (" + registrable + ").");
       } else {
         const dist = levenshtein(clean, brand);
         const threshold = brand.length <= 7 ? 1 : 2;
         if (dist > 0 && dist <= threshold) {
           score += 3;
-          findings.push(`Looks similar to “${brand}” (possible fake).`);
+          findings.push("Looks similar to “" + brand + "” (possible fake).");
         }
       }
     }
-    if (host.includes("xn--")) {
+    if (host.indexOf("xn--") !== -1) {
       score += 2;
       findings.push("Uses special international characters that can mimic brands.");
     }
@@ -126,14 +138,11 @@
     }
 
     return {
-      level,
-      title,
-      body,
-      findings,
-      meta: {
-        Destination: url.href,
-        "Website name": registrable
-      },
+      level: level,
+      title: title,
+      body: body,
+      findings: findings,
+      meta: { Destination: url.href, "Website name": registrable },
       next:
         level === "danger"
           ? [
@@ -153,14 +162,17 @@
     if (!raw) {
       return { level: "caution", title: "Nothing to check", body: "Paste a message first.", findings: [], next: [] };
     }
-    const signals = (window.CALMCLICK_SCAM && window.CALMCLICK_SCAM.signals) || [];
+    const r = rules();
+    const signals = (r && r.signals) || [];
     const hits = [];
     let score = 0;
-    for (const sig of signals) {
-      for (const re of sig.patterns) {
-        if (re.test(raw)) {
+    for (let i = 0; i < signals.length; i++) {
+      const sig = signals[i];
+      const regs = sig._regexes || [];
+      for (let j = 0; j < regs.length; j++) {
+        if (regs[j].test(raw)) {
           hits.push(sig.label);
-          score += sig.weight;
+          score += sig.weight || 1;
           break;
         }
       }
@@ -168,8 +180,13 @@
     const urls = raw.match(/https?:\/\/[^\s<>"']+/gi) || [];
     if (urls[0]) {
       const link = analyzeLink(urls[0]);
-      if (link.level === "danger") { score += 3; hits.push("Contains a risky-looking link"); }
-      else if (link.level === "caution") { score += 1; hits.push("Contains an unusual link"); }
+      if (link.level === "danger") {
+        score += 3;
+        hits.push("Contains a risky-looking link");
+      } else if (link.level === "caution") {
+        score += 1;
+        hits.push("Contains an unusual link");
+      }
     }
 
     let level, title, body;
@@ -187,11 +204,16 @@
       body = "Still use judgment — new scams appear often.";
     }
 
+    const unique = [];
+    for (let k = 0; k < hits.length; k++) {
+      if (unique.indexOf(hits[k]) === -1) unique.push(hits[k]);
+    }
+
     return {
-      level,
-      title,
-      body,
-      findings: [...new Set(hits)],
+      level: level,
+      title: title,
+      body: body,
+      findings: unique,
       meta: { "Links found": String(urls.length) },
       next: [
         "Don’t pay with gift cards or crypto because a message told you to.",
@@ -213,40 +235,72 @@
             ? "result-info"
             : "result-safe";
     el.hidden = false;
-    el.className = `result ${cls}`;
-    el.innerHTML = `
-      <h1>${escapeHtml(result.title)}</h1>
-      <p>${escapeHtml(result.body)}</p>
-      ${
-        result.findings && result.findings.length
-          ? `<p><strong>What we noticed</strong></p><ul>${result.findings
-              .map((f) => `<li>${escapeHtml(f)}</li>`)
-              .join("")}</ul>`
-          : ""
-      }
-      ${
-        result.meta
-          ? `<div class="meta">${Object.entries(result.meta)
-              .map(([k, v]) => `<div><strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}</div>`)
-              .join("")}</div>`
-          : ""
-      }
-      ${
-        result.next && result.next.length
-          ? `<p><strong>What you should do</strong></p><ul>${result.next
-              .map((n) => `<li>${escapeHtml(n)}</li>`)
-              .join("")}</ul>`
-          : ""
-      }
-    `;
+    el.className = "result " + cls;
+    el.innerHTML =
+      "<h1>" +
+      escapeHtml(result.title) +
+      "</h1><p>" +
+      escapeHtml(result.body) +
+      "</p>" +
+      (result.findings && result.findings.length
+        ? "<p><strong>What we noticed</strong></p><ul>" +
+          result.findings.map((f) => "<li>" + escapeHtml(f) + "</li>").join("") +
+          "</ul>"
+        : "") +
+      (result.meta
+        ? '<div class="meta">' +
+          Object.keys(result.meta)
+            .map(function (k) {
+              return (
+                "<div><strong>" +
+                escapeHtml(k) +
+                ":</strong> " +
+                escapeHtml(result.meta[k]) +
+                "</div>"
+              );
+            })
+            .join("") +
+          "</div>"
+        : "") +
+      (result.next && result.next.length
+        ? "<p><strong>What you should do</strong></p><ul>" +
+          result.next.map((n) => "<li>" + escapeHtml(n) + "</li>").join("") +
+          "</ul>"
+        : "");
   }
 
-  const params = new URLSearchParams(location.search);
-  const link = params.get("link");
-  const message = params.get("message");
-  if (link) render(analyzeLink(link));
-  else if (message) render(analyzeMessage(message));
-  else {
-    document.getElementById("status").textContent = "Paste a link from the extension popup to check it.";
+  function showRulesLine(extra) {
+    const line = document.getElementById("rulesLine");
+    if (!line || !window.CalmClickRules) return;
+    const s = window.CalmClickRules.getStatus();
+    line.textContent =
+      "Protection list " +
+      s.rulesVersion +
+      " · " +
+      s.signalCount +
+      " pattern groups" +
+      (extra ? " · " + extra : "");
   }
+
+  async function boot() {
+    if (window.CalmClickRules) {
+      showRulesLine("checking for updates…");
+      const u = await window.CalmClickRules.checkForUpdates({ force: false });
+      if (u.ok && u.isNewer) showRulesLine("updated just now");
+      else if (u.ok) showRulesLine("up to date");
+      else showRulesLine("built-in list (offline update skipped)");
+    }
+
+    const params = new URLSearchParams(location.search);
+    const link = params.get("link");
+    const message = params.get("message");
+    if (link) render(analyzeLink(link));
+    else if (message) render(analyzeMessage(message));
+    else {
+      document.getElementById("status").textContent =
+        "Paste a link from the extension popup to check it.";
+    }
+  }
+
+  boot();
 })();

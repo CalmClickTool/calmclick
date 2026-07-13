@@ -52,6 +52,22 @@ Full store checklist: [`store/CHROME_WEB_STORE.md`](store/CHROME_WEB_STORE.md)
 
 ---
 
+## Protection lists (self-updating, privacy-safe)
+
+CalmClick ships with a built-in 2026 threat pack and can **download newer public rules** from:
+
+`https://calmclicktool.github.io/calmclick/updates/rules-latest.json`
+
+| What updates | What never leaves the device |
+|--------------|------------------------------|
+| Scam pattern regexes, brand list, risky TLDs | The link/message/error you paste |
+
+- Website: auto-checks about once/day + **Update protection lists** button  
+- Offline zip: works without network; update when you next open the online site  
+- Extension: optional fetch of the same feed (`host_permissions` only for our Pages host)
+
+Edit rules: `updates/rules-latest.json` → `scripts/sync-rules.ps1` → commit.
+
 ## Rebuild download zips
 
 ```powershell

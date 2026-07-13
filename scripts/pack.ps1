@@ -1,6 +1,10 @@
 # Build downloadable zips for the website and Chrome Web Store upload
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
+
+# Keep bundled rules in sync with the public feed
+& (Join-Path $PSScriptRoot "sync-rules.ps1")
+
 $Downloads = Join-Path $Root "downloads"
 New-Item -ItemType Directory -Force -Path $Downloads | Out-Null
 
@@ -27,18 +31,20 @@ foreach ($f in $siteFiles) {
   Copy-Item (Join-Path $Root $f) (Join-Path $stage $f) -Force
 }
 Copy-Item (Join-Path $Root "data") (Join-Path $stage "data") -Recurse -Force
+Copy-Item (Join-Path $Root "updates") (Join-Path $stage "updates") -Recurse -Force
 # Include extension in local pack so family can load it too
 Copy-Item (Join-Path $Root "extension") (Join-Path $stage "extension") -Recurse -Force
 
-# Local config: no remote store URL required
+# Local config: still allows optional rules feed when online
 $configLocal = @'
 /* Bundled with offline zip */
 window.CALMCLICK_CONFIG = {
-  version: "1.0.0",
+  version: "1.1.0",
   chromeStoreUrl: "",
   localZipUrl: "#",
   extensionZipUrl: "#",
-  githubUrl: ""
+  githubUrl: "https://github.com/CalmClickTool/calmclick",
+  rulesFeedUrl: "https://calmclicktool.github.io/calmclick/updates/rules-latest.json"
 };
 '@
 Set-Content -Path (Join-Path $stage "config.js") -Value $configLocal -Encoding UTF8

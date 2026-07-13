@@ -9,17 +9,20 @@
 <body>
   <header class="top">
     <div class="brand"><span class="mark">✓</span> CalmClick</div>
-    <p class="sub">Private check · nothing is uploaded</p>
+    <p class="sub">Private check · nothing you paste is uploaded</p>
   </header>
   <main class="wrap">
+    <div id="rulesLine" class="rules-line">Loading protection lists…</div>
     <div id="status" class="status">Checking…</div>
     <div id="result" class="result" hidden></div>
     <p class="footer-note">
-      For the full site with how‑tos and larger text, open the <code>calmclick</code> folder’s
-      <code>index.html</code> in your browser.
+      Full website, offline download, and how‑tos:
+      <a href="https://calmclicktool.github.io/calmclick/" target="_blank" rel="noopener">calmclicktool.github.io/calmclick</a>
     </p>
   </main>
-  <script src="scam-patterns.js"></script>
+  <script src="config-ext.js"></script>
+  <script src="bundled-rules.js"></script>
+  <script src="rules-engine.js"></script>
   <script src="checker.js"></script>
 </body>
 </html>

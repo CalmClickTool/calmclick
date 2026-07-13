@@ -299,6 +299,55 @@ body.text-large {
   max-width: 40rem;
 }
 
+/* Protection list status */
+.protection-status {
+  margin: 0 0 1.15rem;
+  padding: 1rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 14px rgba(21, 35, 28, 0.04);
+}
+
+.protection-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.protection-meta {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-top: 0.2rem;
+}
+
+.protection-msg {
+  margin-top: 0.55rem;
+  color: var(--ink-soft);
+}
+
+.protection-actions {
+  min-width: 12rem;
+  text-align: center;
+}
+
+.protection-actions .btn {
+  width: 100%;
+}
+
+.protection-hint {
+  margin: 0.45rem 0 0;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+@media (max-width: 700px) {
+  .protection-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Tabs */
 .tool-tabs {
   display: grid;

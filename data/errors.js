@@ -198,5 +198,87 @@ window.CALMCLICK_ERRORS = [
       "Move closer to the router and try again.",
       "If nothing works for hours, contact your internet provider with the account phone number on your bill."
     ]
+  },
+  {
+    id: "clickfix",
+    title: "Fake error telling you to press Win+R or paste a command",
+    chips: ["Press Windows + R", "ClickFix", "paste this command"],
+    match: [
+      /windows\s*\+\s*r/i,
+      /win\s*\+\s*r/i,
+      /press\s+ctrl/i,
+      /paste (this|the) (command|script|code)/i,
+      /clickfix/i,
+      /verification id/i,
+      /mshta|powershell\s+-|iex\s*\(/i
+    ],
+    summary: "This is often a “ClickFix” style trap: a webpage fakes an error or CAPTCHA and tells you to run something on your computer.",
+    meaning: "Real websites do not fix problems by asking you to open Run, PowerShell, or paste hidden commands. That step can install malware.",
+    safe: "Do not press Win+R, do not paste into a terminal, and do not download “fixers” from that page.",
+    steps: [
+      "Close the tab or the whole browser. Do not follow the on-screen “fix” steps.",
+      "If you already pasted/ran something, disconnect from Wi‑Fi and get help from a trusted person or shop.",
+      "Run a scan with Windows Security (built into Windows).",
+      "Change important passwords later from a clean device if you think something installed."
+    ]
+  },
+  {
+    id: "fake-captcha",
+    title: "Fake CAPTCHA / “I’m not a robot” that asks you to copy or run steps",
+    chips: ["I'm not a robot", "Verify you are human", "fake CAPTCHA"],
+    match: [
+      /i'?m not a robot/i,
+      /verify you are human/i,
+      /complete (the )?captcha/i,
+      /human verification/i,
+      /hold ctrl/i
+    ],
+    summary: "Some scams dress up as a normal CAPTCHA, then tell you to copy, paste, or run a command to “verify.”",
+    meaning: "A real CAPTCHA only needs a click, checkbox, or simple puzzle — never PowerShell, Run dialog, or “press Ctrl+C then Win+R.”",
+    safe: "Stop. Close the page. You did not fail a real robot check.",
+    steps: [
+      "Close the page. Do not copy or run anything it shows.",
+      "If you reached it from a search ad or odd site, avoid that site.",
+      "Use bookmarks for banking and email instead of search ads.",
+      "Update your browser from its official menu (Help → About), not from a pop-up."
+    ]
+  },
+  {
+    id: "browser-outdated-scare",
+    title: "“Your browser is out of date” full-screen scare",
+    chips: ["Your browser is out of date", "Update Chrome now"],
+    match: [
+      /browser is (out of date|outdated)/i,
+      /update (chrome|edge|firefox|your browser) (now|immediately)/i,
+      /flash (player )?update/i
+    ],
+    summary: "A page is trying to rush you into installing software that may be malware.",
+    meaning: "Browser updates should come from the browser itself (or your app store) — not a random website’s giant red warning.",
+    safe: "Ignore the page’s download button. Close it and update the official way if needed.",
+    steps: [
+      "Close the scary page.",
+      "In Chrome/Edge: three-dot menu → Help → About (it updates there).",
+      "Do not install “Flash,” “codec packs,” or “cleanup tools” from ads.",
+      "If downloads already started, delete them without opening."
+    ]
+  },
+  {
+    id: "passkey-phish",
+    title: "Unexpected passkey / “re-register security key” message",
+    chips: ["Re-register passkey", "security key"],
+    match: [
+      /passkey/i,
+      /security key/i,
+      /re-?register (your )?(passkey|security key)/i
+    ],
+    summary: "Attackers sometimes invent passkey emergencies to push you to a fake login site.",
+    meaning: "Real passkey prompts happen when you are already on a site you trust and choose to sign in — not from a cold email or text with a random link.",
+    safe: "Do not click the message link. Open the real site from your bookmark if you need to check.",
+    steps: [
+      "Do not use the link in the message.",
+      "Type the real site address yourself or use a saved bookmark.",
+      "If nothing seems wrong in your real account, you can ignore the message.",
+      "Never share backup codes or “seed phrases” with anyone."
+    ]
   }
 ];

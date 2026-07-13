@@ -67,6 +67,20 @@
         <code>localStorage</code> so the choice is remembered. That stays on your device.
       </p>
 
+      <h2>Protection list updates (optional)</h2>
+      <p>
+        CalmClick can download an updated <strong>public</strong> pattern file
+        (<code>rules-latest.json</code>) so new scam tricks can be recognized without you
+        reinstalling the whole app. That request is a simple download of rules. It does
+        <strong>not</strong> include the link, message, or error text you are checking.
+      </p>
+      <p>
+        Updated lists may be stored in your browser’s <code>localStorage</code> so they work on
+        the next visit. You can still use CalmClick fully offline with the built-in list.
+        Local/offline copies do not auto-phone home; use “Update protection lists” when online
+        if you want the newest patterns.
+      </p>
+
       <h2>Browser extension</h2>
       <p>
         The CalmClick extension can open a check screen for a link you right‑click or text you select.
@@ -78,6 +92,7 @@
       </p>
       <ul class="privacy-list">
         <li><strong>contextMenus</strong> — adds “Check with CalmClick” to the right‑click menu.</li>
+        <li><strong>https://calmclicktool.github.io/*</strong> — only so the extension can download the public protection-list file (pattern updates). Not used to read your browsing or send pastes.</li>
       </ul>
       <p>
         The extension does not request access to browse all websites, read your email, or modify page content.

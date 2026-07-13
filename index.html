@@ -163,6 +163,8 @@
         <h2 id="check-title">What would you like to check?</h2>
         <p class="section-sub">Pick one, paste what you’re looking at, and we’ll explain it simply.</p>
 
+        <div id="protectionStatus" class="protection-status" aria-live="polite"></div>
+
         <div class="tool-tabs" role="tablist" aria-label="Check type">
           <button type="button" class="tool-tab is-active" role="tab" aria-selected="true" data-tool="link" id="tab-link">
             <span class="tab-icon" aria-hidden="true">🔗</span>
@@ -248,6 +250,7 @@
           <li><strong>Nothing you paste is uploaded.</strong> Checks run only on your device.</li>
           <li><strong>No account. No cookies for tracking. No ads.</strong></li>
           <li><strong>No “cloud AI” reading your messages.</strong> Pattern checks are local rules anyone can inspect.</li>
+          <li><strong>Optional protection-list updates</strong> only download a public pattern file from CalmClick — never your pastes. Offline always keeps working on the built-in list.</li>
           <li><strong>Download a local copy</strong> if you want the tool fully offline under your control.</li>
         </ul>
         <p class="privacy-note">
@@ -271,8 +274,9 @@
   </footer>
 
   <script src="config.js"></script>
+  <script src="data/bundled-rules.js"></script>
+  <script src="data/rules-engine.js"></script>
   <script src="data/errors.js"></script>
-  <script src="data/scam-patterns.js"></script>
   <script src="data/howtos.js"></script>
   <script src="app.js"></script>
 </body>

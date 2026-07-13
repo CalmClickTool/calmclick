@@ -5,24 +5,31 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  // ——— Known good brands (for lookalike detection) ———
-  const TRUSTED_BRANDS = [
-    "google", "gmail", "youtube", "microsoft", "apple", "icloud", "amazon", "paypal",
-    "netflix", "facebook", "instagram", "whatsapp", "chase", "wellsfargo", "bankofamerica",
-    "citibank", "capitalone", "americanexpress", "irs", "usps", "ups", "fedex", "dhl",
-    "ebay", "walmart", "target", "costco", "dropbox", "linkedin", "twitter", "x.com",
-    "adobe", "zoom", "spotify", "venmo", "cashapp", "zelle", "coinbase", "binance"
-  ];
+  function rules() {
+    if (window.CalmClickRules) return window.CalmClickRules.getRules();
+    return window.CALMCLICK_RULES || null;
+  }
 
-  const SUSPICIOUS_TLDS = new Set([
-    "zip", "mov", "xyz", "top", "gq", "tk", "ml", "cf", "ga", "work", "click", "country",
-    "stream", "download", "racing", "review", "science", "kim", "men", "loan", "win"
-  ]);
+  function trustedBrands() {
+    const r = rules();
+    return (r && r.trustedBrands) || [];
+  }
 
-  const SHORTENERS = new Set([
-    "bit.ly", "tinyurl.com", "t.co", "goo.gl", "rebrand.ly", "ow.ly", "is.gd", "buff.ly",
-    "cutt.ly", "shorturl.at", "rb.gy", "tiny.cc", "s.id", "v.gd"
-  ]);
+  function suspiciousTlds() {
+    const r = rules();
+    return (r && r.suspiciousTlds) || new Set();
+  }
+
+  function shorteners() {
+    const r = rules();
+    return (r && r.shorteners) || new Set();
+  }
+
+  function scamSignals() {
+    const r = rules();
+    if (r && r.signals) return r.signals;
+    return (window.CALMCLICK_SCAM && window.CALMCLICK_SCAM.signals) || [];
+  }
 
   // ——— UI: tabs ———
   function initTabs() {
@@ -132,10 +139,9 @@
   function lookalikeHits(sld) {
     const hits = [];
     const clean = sld.replace(/[^a-z0-9]/gi, "").toLowerCase();
-    for (const brand of TRUSTED_BRANDS) {
+    for (const brand of trustedBrands()) {
       if (clean === brand) continue;
       if (clean.includes(brand) && clean !== brand) {
-        // paypal-secure, appleid-verify style
         hits.push({ brand, reason: `contains “${brand}” but is not the official domain` });
         continue;
       }
@@ -147,6 +153,14 @@
     }
     return hits;
   }
+
+  /** Free hosts often abused for phishing kits (2024–2026). */
+  const ABUSE_HOST_MARKERS = [
+    "web.app", "firebaseapp.com", "pages.dev", "netlify.app", "vercel.app",
+    "github.io", "gitlab.io", "blogspot.com", "workers.dev", "trycloudflare.com",
+    "ngrok.io", "ngrok-free.app", "loca.lt", "duckdns.org", "000webhostapp.com",
+    "infinityfreeapp.com", "weebly.com", "square.site", "godaddysites.com"
+  ];
 
   // ——— Link analysis ———
   function analyzeLink(raw) {
@@ -191,15 +205,51 @@
     }
 
     // Suspicious TLD
-    if (SUSPICIOUS_TLDS.has(tld)) {
+    if (suspiciousTlds().has(tld)) {
       score += 2;
       findings.push(`Ends with .${tld}, which scammers use more often than big banks or stores.`);
     }
 
     // Shortener
-    if (SHORTENERS.has(registrable) || SHORTENERS.has(host)) {
+    if (shorteners().has(registrable) || shorteners().has(host)) {
       score += 2;
       findings.push("This is a shortened link. The real destination is hidden until you open it (or expand it with a trusted tool).");
+    }
+
+    // Free hosting / tunneling often used for phishing kits
+    for (const marker of ABUSE_HOST_MARKERS) {
+      if (host === marker || host.endsWith("." + marker)) {
+        // github.io can be legit — only warn, don't max score alone
+        score += marker === "github.io" || marker === "pages.dev" ? 1 : 2;
+        findings.push(
+          `Hosted on “${marker}”, a free/share host. Banks and big companies almost never use these for real logins.`
+        );
+        break;
+      }
+    }
+
+    // Homoglyph digits in brand-like labels (paypa1, g00gle)
+    if (/\d/.test(sld) && /[a-z]/i.test(sld)) {
+      const digitSpoof = sld.replace(/0/g, "o").replace(/1/g, "l").replace(/3/g, "e").replace(/4/g, "a").replace(/5/g, "s").replace(/7/g, "t");
+      for (const brand of trustedBrands()) {
+        if (digitSpoof === brand && sld !== brand) {
+          score += 3;
+          findings.push(`Name “${sld}” looks like “${brand}” with numbers swapped for letters — a common fake.`);
+          break;
+        }
+      }
+    }
+
+    // Double extension style paths / exe-looking
+    if (/\.(exe|scr|msi|bat|cmd|ps1|js|vbs|apk)(\?|$)/i.test(url.pathname)) {
+      score += 3;
+      findings.push("Path points at a program/install file. Be very careful downloading executables from unexpected links.");
+    }
+
+    // Punycode already handled below; also flag userinfo @ trick without username parse
+    if (/https?:\/\/[^/]*@/i.test(raw)) {
+      score += 3;
+      findings.push("Uses an “@” in the web address, which can hide where the link really goes.");
     }
 
     // Very long / many subdomains
@@ -217,7 +267,7 @@
 
     // Brand name only in path/query while domain is unrelated
     const full = url.href.toLowerCase();
-    for (const brand of TRUSTED_BRANDS) {
+    for (const brand of trustedBrands()) {
       if (full.includes(brand) && !host.includes(brand) && sld !== brand) {
         score += 2;
         findings.push(`Mentions “${brand}” in the link text/path, but the real website name is “${registrable}.”`);
@@ -362,15 +412,16 @@
       };
     }
 
-    const signals = (window.CALMCLICK_SCAM && window.CALMCLICK_SCAM.signals) || [];
+    const signals = scamSignals();
     const hits = [];
     let score = 0;
 
     for (const sig of signals) {
-      for (const re of sig.patterns) {
-        if (re.test(raw)) {
+      const regs = sig._regexes || sig.patterns || [];
+      for (const re of regs) {
+        if (re && typeof re.test === "function" && re.test(raw)) {
           hits.push(sig.label);
-          score += sig.weight;
+          score += sig.weight || 1;
           break;
         }
       }
@@ -603,6 +654,98 @@
     }
   }
 
+  // ——— Protection list status + privacy-safe updates ———
+  function formatWhen(ts) {
+    if (!ts) return "not yet";
+    try {
+      return new Date(ts).toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short"
+      });
+    } catch {
+      return "recently";
+    }
+  }
+
+  function renderProtectionStatus(extraMsg) {
+    const el = $("#protectionStatus");
+    if (!el || !window.CalmClickRules) return;
+    const s = window.CalmClickRules.getStatus();
+    const sourceLabel =
+      s.source === "remote"
+        ? "updated list from CalmClick"
+        : s.source === "cache"
+          ? "saved update on this device"
+          : s.source === "bundled"
+            ? "built-in list (works offline)"
+            : "unknown";
+
+    el.innerHTML = `
+      <div class="protection-grid">
+        <div>
+          <strong>Protection list</strong>
+          <div class="protection-meta">Version <code>${escapeHtml(s.rulesVersion)}</code> · ${escapeHtml(sourceLabel)}</div>
+          <div class="protection-meta">${s.signalCount} scam pattern groups · ${s.brandCount} brand names watched</div>
+          <div class="protection-meta">Last list check: ${escapeHtml(formatWhen(s.lastCheckAt))}</div>
+          ${extraMsg ? `<div class="protection-msg">${extraMsg}</div>` : ""}
+        </div>
+        <div class="protection-actions">
+          <button type="button" class="btn btn-secondary" id="updateRulesBtn">Update protection lists</button>
+          <p class="hint protection-hint">Only downloads a public pattern file. Never uploads what you paste.</p>
+        </div>
+      </div>
+    `;
+
+    const btn = $("#updateRulesBtn", el);
+    if (btn) {
+      btn.addEventListener("click", async () => {
+        btn.disabled = true;
+        btn.textContent = "Checking…";
+        const result = await window.CalmClickRules.checkForUpdates({ force: true });
+        btn.disabled = false;
+        btn.textContent = "Update protection lists";
+        let msg;
+        if (result.ok && result.isNewer) {
+          msg = `✅ Updated to <strong>${escapeHtml(result.rulesVersion)}</strong>. New checks are active on this device.`;
+        } else if (result.ok && result.updated && !result.isNewer) {
+          msg = `✅ Lists refreshed (version <strong>${escapeHtml(result.rulesVersion)}</strong>). You’re current.`;
+        } else if (result.ok && !result.updated) {
+          msg = `✅ Already up to date (<strong>${escapeHtml(result.rulesVersion)}</strong>).`;
+        } else if (result.skipped) {
+          msg = `Lists were checked recently. You’re on <strong>${escapeHtml(result.rulesVersion)}</strong>.`;
+        } else {
+          msg = `⚠️ Couldn’t reach the update list (offline or blocked). Built-in protection still works.`;
+        }
+        renderProtectionStatus(msg);
+      });
+    }
+  }
+
+  async function initProtectionUpdates() {
+    renderProtectionStatus("");
+    if (!window.CalmClickRules) return;
+
+    // Quiet auto-check when running on a real website (not file:// offline copy)
+    const onlinePage = location.protocol === "http:" || location.protocol === "https:";
+    if (!onlinePage) {
+      renderProtectionStatus(
+        "Offline / local copy: using built-in lists. Open the website later and tap <strong>Update protection lists</strong> to refresh."
+      );
+      return;
+    }
+
+    const result = await window.CalmClickRules.checkForUpdates({ force: false });
+    if (result.ok && result.isNewer) {
+      renderProtectionStatus(
+        `✅ Protection lists auto-updated to <strong>${escapeHtml(result.rulesVersion)}</strong>.`
+      );
+    } else if (result.ok) {
+      renderProtectionStatus("");
+    } else {
+      renderProtectionStatus("Using built-in lists (update check unavailable right now).");
+    }
+  }
+
   // ——— Get / install CTAs ———
   function initGetSection() {
     const cfg = window.CALMCLICK_CONFIG || {};
@@ -655,5 +798,6 @@
     initErrorTool();
     initHowtos();
     initGetSection();
+    initProtectionUpdates();
   });
 })();
