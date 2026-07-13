@@ -1,6 +1,7 @@
 # Chrome Web Store — CalmClick listing pack
 
 Upload zip: **`downloads/calmclick-extension.zip`**  
+**Live listing:** **https://chromewebstore.google.com/detail/calmclick-check-before-yo/bmioajebjpcjilkegiaheeedindidmpf**  
 Privacy policy: **https://calmclicktool.github.io/calmclick/privacy.html**  
 Homepage: **https://calmclicktool.github.io/calmclick/**
 

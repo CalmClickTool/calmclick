@@ -40,7 +40,7 @@ $configLocal = @'
 /* Bundled with offline zip */
 window.CALMCLICK_CONFIG = {
   version: "1.1.0",
-  chromeStoreUrl: "",
+  chromeStoreUrl: "https://chromewebstore.google.com/detail/calmclick-check-before-yo/bmioajebjpcjilkegiaheeedindidmpf",
   localZipUrl: "#",
   extensionZipUrl: "#",
   githubUrl: "https://github.com/CalmClickTool/calmclick",

@@ -1,8 +1,7 @@
 /* Site config — set chromeStoreUrl after the extension is published to the Chrome Web Store */
 window.CALMCLICK_CONFIG = {
   version: "1.1.1",
-  /* Paste the Chrome Web Store URL here when live, e.g. https://chromewebstore.google.com/detail/... */
-  chromeStoreUrl: "",
+  chromeStoreUrl: "https://chromewebstore.google.com/detail/calmclick-check-before-yo/bmioajebjpcjilkegiaheeedindidmpf",
   localZipUrl: "downloads/calmclick-offline.zip",
   extensionZipUrl: "downloads/calmclick-extension.zip",
   githubUrl: "https://github.com/CalmClickTool/calmclick",

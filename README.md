@@ -36,11 +36,11 @@ Why local is nudged: works offline, no dependency on site uptime, folder you con
 
 ## Browser extension
 
-### After Chrome Web Store approval
+### Chrome Web Store (live)
 
-1. Put the store URL in `config.js` → `chromeStoreUrl`
-2. Rebuild zips: `powershell -File scripts/pack.ps1`
-3. Redeploy / push so the site button goes “Add to Chrome”
+**https://chromewebstore.google.com/detail/calmclick-check-before-yo/bmioajebjpcjilkegiaheeedindidmpf**
+
+Homepage **Get the free extension** uses this URL via `config.js` → `chromeStoreUrl`.
 
 ### Install now (developer / sideload)
 
