@@ -802,27 +802,46 @@
     }
 
     const storeUrl = (cfg.chromeStoreUrl || "").trim();
+    const installSummary = $("#extensionInstallSummary");
+    const installHint = $("#extensionInstallHint");
+
     if (storeUrl) {
       if (storeBtn) {
         storeBtn.setAttribute("href", storeUrl);
         storeBtn.setAttribute("target", "_blank");
-        storeBtn.setAttribute("rel", "noopener");
+        storeBtn.setAttribute("rel", "noopener noreferrer");
         storeBtn.textContent = "Add to Chrome — free";
       }
       if (storeNote) storeNote.textContent = "Official Chrome Web Store · also works in Edge";
       if (storeBlock) storeBlock.hidden = false;
       if (storeLink) {
         storeLink.setAttribute("href", storeUrl);
+        storeLink.setAttribute("target", "_blank");
+        storeLink.setAttribute("rel", "noopener noreferrer");
+      }
+      if (installSummary) {
+        installSummary.textContent = "Other ways to install (optional)";
+      }
+      if (installHint) {
+        installHint.textContent =
+          "Most people can use Add to Chrome above. Manual / offline install remains available here.";
       }
       // Keep sideload available but secondary
     } else {
       if (storeBtn) {
         storeBtn.setAttribute("href", "#extension-install");
         storeBtn.removeAttribute("target");
-        storeBtn.textContent = "Get the free extension";
+        storeBtn.removeAttribute("rel");
+        storeBtn.textContent = "Install guide (Store coming soon)";
       }
-      if (storeNote) storeNote.textContent = "Free install · Chrome or Edge · 2 minutes";
+      if (storeNote) {
+        storeNote.textContent =
+          "Chrome Web Store listing under review · free manual install for Chrome or Edge";
+      }
       if (storeBlock) storeBlock.hidden = true;
+      if (installSummary) {
+        installSummary.textContent = "Install the extension (manual, until Store is live)";
+      }
     }
   }
 

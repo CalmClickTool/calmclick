@@ -97,7 +97,7 @@
             <a class="btn btn-secondary" id="chromeStoreBtn" href="#extension-install">
               Get the free extension
             </a>
-            <p class="get-foot" id="extensionCtaNote">Chrome Web Store · also works in Edge</p>
+            <p class="get-foot" id="extensionCtaNote">Chrome Web Store listing under review · install guide below for now</p>
           </article>
 
           <!-- Use online -->
@@ -127,7 +127,7 @@
         </div>
 
         <details class="install-details" id="extension-install">
-          <summary>How to install the extension (Chrome or Edge)</summary>
+          <summary id="extensionInstallSummary">Install the extension (manual, until Store is live)</summary>
           <div class="install-body">
             <div id="storeInstallBlock" hidden>
               <p>
@@ -136,6 +136,7 @@
                 </a>
               </p>
               <p>Click <strong>Add to Chrome</strong> (or Edge). That’s it.</p>
+              <p class="hint">Prefer not to use the Store? Manual install steps are still below.</p>
             </div>
             <div id="sideloadInstallBlock">
               <ol class="install-steps">
@@ -148,9 +149,9 @@
                 <li>Click <strong>Load unpacked</strong> and select the unzipped <code>extension</code> folder.</li>
                 <li>Pin CalmClick from the puzzle-piece menu if you like. Right‑click any link → Check with CalmClick.</li>
               </ol>
-              <p class="hint">
-                When the Chrome Web Store listing is live, this page will point you there for one‑click install.
-                Sideloading stays available forever for the local / offline crowd.
+              <p class="hint" id="extensionInstallHint">
+                As soon as the Chrome Web Store listing is approved, paste the URL into
+                <code>config.js</code> (<code>chromeStoreUrl</code>). The big button above will open the Store automatically.
               </p>
             </div>
           </div>
